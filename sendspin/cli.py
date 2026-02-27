@@ -13,6 +13,7 @@ from importlib.metadata import version
 from typing import TYPE_CHECKING
 
 from sendspin.hardware_volume import AVAILABLE as HW_VOLUME_AVAILABLE
+from sendspin.hardware_volume import async_check_available as hw_volume_check_available
 from sendspin.settings import ClientSettings, get_client_settings, get_serve_settings
 
 if TYPE_CHECKING:
@@ -599,6 +600,10 @@ async def _run_client_mode(args: argparse.Namespace) -> int:
 
     # Set up logging with resolved log level
     logging.basicConfig(level=getattr(logging, args.log_level))
+
+    if args.hardware_volume and not await hw_volume_check_available():
+        LOGGER.warning("PulseAudio server not reachable, falling back to software volume control")
+        args.hardware_volume = False
 
     # Handle daemon subcommand
     if args.command == "daemon":
