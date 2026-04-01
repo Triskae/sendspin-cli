@@ -76,36 +76,39 @@ def get_device_info(
         manufacturer: Override the manufacturer field (default: None).
         product_name: Override the auto-detected product name.
     """
-    # Get OS/platform information
-    system = platform.system()
-    detected_product_name = f"{system}"
+    # Skip OS detection entirely when product_name is explicitly provided.
+    if product_name is not None:
+        detected_product_name = product_name
+    else:
+        system = platform.system()
+        detected_product_name = f"{system}"
 
-    # Try to get more specific product info
-    if system == "Linux":
-        # Try reading /etc/os-release for distribution info
-        try:
-            os_release = Path("/etc/os-release")
-            if os_release.exists():
-                with os_release.open() as f:
-                    for line in f:
-                        if line.startswith("PRETTY_NAME="):
-                            detected_product_name = line.split("=", 1)[1].strip().strip('"')
-                            break
-        except (OSError, IndexError):
-            pass
-    elif system == "Darwin":
-        mac_version = platform.mac_ver()[0]
-        detected_product_name = f"macOS {mac_version}" if mac_version else "macOS"
-    elif system == "Windows":
-        try:
-            win_ver = platform.win32_ver()
-            # Check build number to distinguish Windows 11 (build 22000+) from Windows 10
-            if win_ver[0] == "10" and win_ver[1] and int(win_ver[1].split(".")[2]) >= 22000:
-                detected_product_name = "Windows 11"
-            else:
-                detected_product_name = f"Windows {win_ver[0]}"
-        except (ValueError, IndexError, AttributeError):
-            detected_product_name = f"Windows {platform.release()}"
+        # Try to get more specific product info
+        if system == "Linux":
+            # Try reading /etc/os-release for distribution info
+            try:
+                os_release = Path("/etc/os-release")
+                if os_release.exists():
+                    with os_release.open() as f:
+                        for line in f:
+                            if line.startswith("PRETTY_NAME="):
+                                detected_product_name = line.split("=", 1)[1].strip().strip('"')
+                                break
+            except (OSError, IndexError):
+                pass
+        elif system == "Darwin":
+            mac_version = platform.mac_ver()[0]
+            detected_product_name = f"macOS {mac_version}" if mac_version else "macOS"
+        elif system == "Windows":
+            try:
+                win_ver = platform.win32_ver()
+                # Check build number to distinguish Windows 11 (build 22000+) from Windows 10
+                if win_ver[0] == "10" and win_ver[1] and int(win_ver[1].split(".")[2]) >= 22000:
+                    detected_product_name = "Windows 11"
+                else:
+                    detected_product_name = f"Windows {win_ver[0]}"
+            except (ValueError, IndexError, AttributeError):
+                detected_product_name = f"Windows {platform.release()}"
 
     # Get software version
     try:
@@ -114,7 +117,7 @@ def get_device_info(
         software_version = "aiosendspin (unknown version)"
 
     return DeviceInfo(
-        product_name=product_name if product_name is not None else detected_product_name,
+        product_name=detected_product_name,
         manufacturer=manufacturer,
         software_version=software_version,
     )
