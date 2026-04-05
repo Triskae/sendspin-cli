@@ -178,10 +178,7 @@ def _add_player_runtime_options(target: ArgumentTarget, *, suppress_defaults: bo
         "--product-name",
         type=str,
         default=default,
-        help=(
-            "Product name reported in the client hello "
-            "(defaults to auto-detected OS/platform name)"
-        ),
+        help="Product name reported in the client hello (defaults to auto-detected OS/platform name)",
     )
     target.add_argument(
         "--hook-start",
@@ -418,10 +415,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--product-name",
         type=str,
         default=None,
-        help=(
-            "Product name reported in the client hello "
-            "(defaults to auto-detected OS/platform name)"
-        ),
+        help="Product name reported in the client hello (defaults to auto-detected OS/platform name)",
     )
 
     return parser
